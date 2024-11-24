@@ -1,0 +1,174 @@
+import tkinter as tk
+from tkinter import ttk, messagebox, simpledialog
+
+
+class StylishToDoListApp:
+    def __init__(self, root):
+        self.root = root
+        self.root.title(" To-Do List Application")
+        self.root.state("zoomed")  # Full screen
+        self.root.configure(bg="#282c34")
+
+       
+        self.tasks = []
+
+      
+        self.header_frame = tk.Frame(self.root, bg="yellow", height=80)
+        self.header_frame.pack(fill="x")
+
+        self.title_label = tk.Label(
+            self.header_frame,
+            text=" To-Do List",
+            font=("Helvetica", 24, "bold"),
+            bg="yellow",
+            fg="black",
+        )
+        self.title_label.pack(pady=20)
+
+        self.content_frame = tk.Frame(self.root, bg="#282c34")
+        self.content_frame.pack(fill="both", expand=True, padx=20, pady=20)
+
+       
+        self.task_listbox = tk.Listbox(
+            self.content_frame,
+            font=("Helvetica", 16),
+            bg="#3e4451",
+            fg="white",
+            selectbackground="#98c379",
+            selectforeground="black",
+            height=20,
+            bd=2,
+            relief="sunken",
+        )
+        self.task_listbox.pack(side="left", fill="both", expand=True, padx=(0, 10))
+
+       
+        self.scrollbar = tk.Scrollbar(self.content_frame, command=self.task_listbox.yview)
+        self.scrollbar.pack(side="right", fill="y")
+        self.task_listbox.config(yscrollcommand=self.scrollbar.set)
+
+        self.button_frame = tk.Frame(self.root, bg="#282c34")
+        self.button_frame.pack(fill="x", pady=10)
+
+        self.add_task_button = ttk.Button(
+            self.button_frame,
+            text="➕ Add Task",
+            command=self.add_task,
+            style="TButton",
+        )
+        self.add_task_button.grid(row=0, column=0, padx=10, pady=10 )
+
+        self.edit_task_button = ttk.Button(
+            self.button_frame,
+            text="✏️ Edit Task",
+            command=self.edit_task,
+            style="TButton",
+        )
+        self.edit_task_button.grid(row=0, column=1, padx=10, pady=10)
+
+        self.delete_task_button = ttk.Button(
+            self.button_frame,
+            text="❌ Delete Task",
+            command=self.delete_task,
+            style="TButton",
+        )
+        self.delete_task_button.grid(row=0, column=2, padx=10, pady=10)
+
+        self.mark_complete_button = ttk.Button(
+            self.button_frame,
+            text="✔️ Mark Complete",
+            command=self.mark_complete,
+            style="TButton",
+        )
+        self.mark_complete_button.grid(row=0, column=3, padx=10, pady=10)
+
+        self.clear_all_button = ttk.Button(
+            self.button_frame,
+            text="🧹 Clear All",
+            command=self.clear_all_tasks,
+            style="TButton",
+        )
+        self.clear_all_button.grid(row=0, column=4, padx=10, pady=10)
+
+        
+        style = ttk.Style()
+        style.configure("TButton", font=("Helvetica", 14), padding=10)
+        style.configure(
+            "Danger.TButton",
+            font=("Helvetica", 14),
+            padding=10,
+            background="#e06c75",
+            foreground="white",
+            relief="raised",
+        )
+        style.configure(
+            "Success.TButton",
+            font=("Helvetica", 14),
+            padding=10,
+            background="#98c379",
+            foreground="white",
+            relief="raised",
+        )
+
+        
+        self.update_task_list()
+
+    def add_task(self):
+        
+        new_task = simpledialog.askstring("Add Task", "Enter the new task:")
+        if new_task:
+            self.tasks.append({"task": new_task, "completed": False})
+            self.update_task_list()
+
+    def edit_task(self):
+        
+        selected_index = self.task_listbox.curselection()
+        if selected_index:
+            current_task = self.tasks[selected_index[0]]
+            updated_task = simpledialog.askstring(
+                "Edit Task", "Update the task:", initialvalue=current_task["task"]
+            )
+            if updated_task:
+                self.tasks[selected_index[0]]["task"] = updated_task
+                self.update_task_list()
+        else:
+            messagebox.showwarning("Warning", "No task selected!")
+
+    def delete_task(self):
+        
+        selected_index = self.task_listbox.curselection()
+        if selected_index:
+            self.tasks.pop(selected_index[0])
+            self.update_task_list()
+        else:
+            messagebox.showwarning("Warning", "No task selected!")
+
+    def mark_complete(self):
+        
+        selected_index = self.task_listbox.curselection()
+        if selected_index:
+            self.tasks[selected_index[0]]["completed"] = True
+            self.update_task_list()
+        else:
+            messagebox.showwarning("Warning", "No task selected!")
+
+    def clear_all_tasks(self):
+        
+        confirm = messagebox.askyesno("Confirm", "Are you sure you want to clear all tasks?")
+        if confirm:
+            self.tasks.clear()
+            self.update_task_list()
+
+    def update_task_list(self):
+        
+        self.task_listbox.delete(0, tk.END)
+        for task in self.tasks:
+            status = "✔️" if task["completed"] else "🕒"
+            self.task_listbox.insert(tk.END, f"{status} {task['task']}")
+
+
+
+if __name__ == "__main__":
+    root = tk.Tk()
+    app = StylishToDoListApp(root)
+    root.mainloop()
